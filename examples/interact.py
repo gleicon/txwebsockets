@@ -3,16 +3,19 @@ import datetime
 
 class MyOperations(BasicOperations):
 
-    def on_read(self, sl, line):
+    def on_read(self, line):
         print  "read:", line 
-        sl('\x00clock!%s\xff' % datetime.datetime.now())
-        sl('\x00out!%s\xff' % line)
+        self._out('clock!%s' % datetime.datetime.now())
+        self._out('out!%s' % line)
     
     def on_connect(self):
-        print "connected"  
+        print "connected. writeHandler is ", self.writeHandler  
 
     def on_close(self, r):
         print "connection closed: ", r 
+
+    def after_connection(self):
+        self._out('out!after_connection')
 
 if __name__ == '__main__':
     from twisted.internet import reactor

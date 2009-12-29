@@ -21,13 +21,29 @@ import re
 
 class BasicOperations(object):
     """ Basic tx websockets operations handler. Overwrite it with your operations """
-    def on_read(self, sendLine, handler):
+    def __init__(self):
+        self.writeHandler=None
+
+    def on_read(self, sendLine):
         pass
+    
     def on_connect(self):
         pass
+    
     def on_close(self, r):
         pass
 
+    def setWriteHandler(self, handler):
+        self.writeHandler=handler
+   
+    def _out(self, str):
+        if self.writeHandler == None:
+            print 'No handler'
+        else:
+            self.writeHandler('\x00%s\xff' % str)
+
+    def after_connection(self):
+        pass
 
 class WebSocketServer(LineReceiver):
     HDR_ORIGIN = re.compile('Origin\:\s+(.*)')
@@ -46,9 +62,7 @@ WebSocket-Location: ws://%s%s\r\n\r\n'''
         self.factory.oper.on_connect()
     
     def lineReceived(self, line):
-        self.factory.oper.on_read(self.sendLine, line)
-        #self.sendLine('\x00clock!%s\xff' % datetime.datetime.now())
-        #self.sendLine('\x00out!%s\xff' % line)
+        self.factory.oper.on_read(line)
 
     def rawDataReceived(self, line):
         origin, location, host = self._parseHeaders(line)
@@ -56,7 +70,9 @@ WebSocket-Location: ws://%s%s\r\n\r\n'''
         self.sendLine(self.hdr % (origin, host, location))
         self.delimiter='\xff'
         self.setLineMode()
-    
+        self.factory.oper.setWriteHandler(self.sendLine)
+        self.factory.oper.after_connection()
+
     def connectionLost(self, reason):
         self.factory.oper.on_close(reason)
 
