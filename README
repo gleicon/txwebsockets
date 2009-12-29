@@ -1,0 +1,13 @@
+Twisted WebSockets protocol
+
+- To test it, run python -m SimpleHTTPServer 8888 to serve interact.html
+- run python protocol.py and open http://localhost:8888/interact.html
+- type something in the text box
+
+
+The inspiration for a websocket server (and the test html) came from Joe Armstrong.
+
+Check interact.py to learn how to setup a basic operations class and pass it to the protocol factory.
+
+Gleicon Moraes
+ 
