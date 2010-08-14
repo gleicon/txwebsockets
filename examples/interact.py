@@ -19,7 +19,7 @@ class MyOperations(BasicOperations):
 
 if __name__ == '__main__':
     from twisted.internet import reactor
-    mo = MyOperations()
+    mo = MyOperations
 
     factory = WebSocketFactory(mo)
 
