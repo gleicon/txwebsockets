@@ -5,7 +5,6 @@ import re
 
 def _calculate_token(k1, k2, k3):
     token = struct.pack('>II8s', _filterella(k1), _filterella(k2), k3)
-    #token = struct.pack('>II8s', 544790785, 2008475658, k3)
 
     return md5(token).digest()
 
@@ -30,4 +29,4 @@ if __name__ == '__main__':
     print _hexify(nonce)
     cc = _calculate_token("2h7n 2  3 9539 25#Tj","Sa40? 1y6i9k513_Lju16F +", nonce)
     print 'calculated:\t', _hexify(cc)
-    print "correct:\t01 0f 15 3a 72 8f 5d 93 ec 68 d4 fa f3 94 2f 0c"
+    print "correct:\t5b ba 3f ac 07 78 c1 a6 16 7e 38 e7 06 50 29 29"

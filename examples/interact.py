@@ -1,12 +1,14 @@
 from txwebsockets import WebSocketFactory, BasicOperations
-import datetime
+import datetime, re
 
 class MyOperations(BasicOperations):
 
     def on_read(self, line):
-        print  "read:", line 
+        print  "read:", line[1:] 
+        print self.hexify(line[1:])
+
         self._out('clock!%s' % datetime.datetime.now())
-        self._out('out!%s' % line)
+        self._out('out!%s' % line[1:])
     
     def on_connect(self):
         print "connected. writeHandler is ", self.writeHandler  
@@ -17,6 +19,9 @@ class MyOperations(BasicOperations):
     def after_connection(self):
         self._out('out!after_connection')
 
+    def hexify(self, sto):
+        return re.sub(".", lambda x: "%02x " % ord(x.group(0)), sto)
+        
 if __name__ == '__main__':
     from twisted.internet import reactor
     mo = MyOperations()

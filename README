@@ -1,7 +1,7 @@
 Twisted WebSockets protocol
 
-- To test it, run python -m SimpleHTTPServer 8888 to serve interact.html
-- run python protocol.py and open http://localhost:8888/interact.html
+- To test it open a terminal window, cd examples, run python -m SimpleHTTPServer 8888 to serve interact.html
+- In another window, run python examples/interact.py and open http://localhost:8888/interact.html
 - type something in the text box
 
 
