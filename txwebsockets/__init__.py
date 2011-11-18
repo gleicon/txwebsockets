@@ -48,7 +48,7 @@ class BasicOperations(object):
     def after_connection(self):
         pass
 
-class WebSocketServer(LineReceiver):
+class WebSocketConnection(LineReceiver):
     HDR_ORIGIN = re.compile('Origin\:\s+(.*)')
     HDR_LOCATION = re.compile('GET\s+(.*)\s+HTTP\/1.1', re.I)
     HDR_HOST = re.compile('Host\:\s+(.*)')
@@ -56,8 +56,9 @@ class WebSocketServer(LineReceiver):
     SEC_WS_KEY1 = re.compile('Sec-WebSocket-Key1\:\s+(.*)')
     SEC_WS_KEY2 = re.compile('Sec-WebSocket-Key2\:\s+(.*)')
 
-    def __init__(self):
-        
+    def __init__(self,oper):
+        self.oper = oper
+
         self.old_hdr = '''HTTP/1.1 101 Web Socket Protocol Handshake\r
 Upgrade: WebSocket\r
 Connection: Upgrade\r
@@ -74,10 +75,10 @@ Sec-WebSocket-Location: ws://%s%s\r\n\r
 
     def connectionMade(self):
         self.setRawMode()
-        self.factory.oper.on_connect()
+        self.oper.on_connect()
     
     def lineReceived(self, line):
-        self.factory.oper.on_read(line)
+        self.oper.on_read(line)
 
     def rawDataReceived(self, line):
         origin, location, host, token = self._parseHeaders(line)
@@ -88,11 +89,11 @@ Sec-WebSocket-Location: ws://%s%s\r\n\r
             self.sendLine(self.hdr % (origin, host, location, token))
         self.delimiter='\xff'
         self.setLineMode()
-        self.factory.oper.setWriteHandler(self.sendLine)
-        self.factory.oper.after_connection()
+        self.oper.setWriteHandler(self.sendLine)
+        self.oper.after_connection()
 
     def connectionLost(self, reason):
-        self.factory.oper.on_close(reason)
+        self.oper.on_close(reason)
 
     def _parseHeaders(self, buf):
         if buf == None:
@@ -126,7 +127,7 @@ Sec-WebSocket-Location: ws://%s%s\r\n\r
             return o, l, h, None
 
     def _calculate_token(self, k1, k2, k3):
-        token = struct.pack('>ii8s', self._filterella(k1), self._filterella(k2), k3)
+        token = struct.pack('>II8s', self._filterella(k1), self._filterella(k2), k3)
         return md5(token).digest()
 
     def _filterella(self, w):
@@ -139,9 +140,10 @@ Sec-WebSocket-Location: ws://%s%s\r\n\r
         return x
 
 class WebSocketFactory(Factory):
-    protocol = WebSocketServer
+    protocol = WebSocketConnection
 
     def __init__(self, oper=BasicOperations):
         self.oper=oper
 
-
+    def buildProtocol(self, addr):
+        return self.protocol(self.oper())
